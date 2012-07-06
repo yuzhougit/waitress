@@ -29,19 +29,19 @@ class TestThreadedTaskDispatcher(unittest.TestCase):
 
     def test_set_thread_count_increase(self):
         inst = self._makeOne()
-        L = []
-        inst.start_new_thread = lambda *x: L.append(x)
+        mod = DummyThreadModule()
+        inst.thread_module = mod
         inst.set_thread_count(1)
-        self.assertEqual(L, [(inst.handler_thread, (0,))])
+        self.assertEqual(mod.threads, [(inst.handler_thread, (0,))])
 
     def test_set_thread_count_increase_with_existing(self):
         inst = self._makeOne()
-        L = []
+        mod = DummyThreadModule()
+        inst.thread_module = mod
         inst.threads = {0:1}
-        inst.start_new_thread = lambda *x: L.append(x)
         inst.set_thread_count(2)
-        self.assertEqual(L, [(inst.handler_thread, (1,))])
-
+        self.assertEqual(mod.threads, [(inst.handler_thread, (1,))])
+        
     def test_set_thread_count_decrease(self):
         inst = self._makeOne()
         inst.threads = {'a':1, 'b':2}
@@ -51,11 +51,11 @@ class TestThreadedTaskDispatcher(unittest.TestCase):
 
     def test_set_thread_count_same(self):
         inst = self._makeOne()
-        L = []
-        inst.start_new_thread = lambda *x: L.append(x)
+        mod = DummyThreadModule()
+        inst.thread_module = mod
         inst.threads = {0:1}
         inst.set_thread_count(1)
-        self.assertEqual(L, [])
+        self.assertEqual(mod.threads, [])
 
     def test_add_task(self):
         task = DummyTask()
@@ -684,3 +684,9 @@ class DummyLogger(object):
     def exception(self, msg):
         self.logged.append(msg)
 
+class DummyThreadModule(object):
+    def __init__(self):
+        self.threads = []
+    def start_new_thread(self, *x):
+        self.threads.append(x)
+    

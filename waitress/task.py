@@ -55,9 +55,9 @@ class ThreadedTaskDispatcher(object):
     """A Task Dispatcher that creates a thread for each task.
     """
 
-    stop_count = 0  # Number of threads that will stop soon.
-    start_new_thread = thread.start_new_thread
-    logger = logger
+    stop_count = 0         # Number of threads that will stop soon.
+    thread_module = thread # for testing
+    logger = logger        # for testing
 
     def __init__(self):
         self.threads = {}  # { thread number -> 1 }
@@ -101,7 +101,10 @@ class ThreadedTaskDispatcher(object):
                     thread_no = thread_no + 1
                 threads[thread_no] = 1
                 running += 1
-                self.start_new_thread(self.handler_thread, (thread_no,))
+                self.thread_module.start_new_thread(
+                    self.handler_thread,
+                    (thread_no,)
+                    )
                 thread_no = thread_no + 1
             if running > count:
                 # Stop threads.
