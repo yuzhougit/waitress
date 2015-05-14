@@ -1358,7 +1358,7 @@ class ProcExitTests(TcpTests, unittest.TestCase):
     def tearDown(self):
         self.stop_subprocess()
 
-    def test_keyboard_interrupt_exits_main_process(self):
+    def test_thread_interrupt_main_exits_main_process(self):
         to_send = "GET / HTTP/1.0\n\n"
         to_send = tobytes(to_send)
         self.connect()
