@@ -102,7 +102,9 @@ class _triggerbase(object):
             for thunk in self.thunks:
                 try:
                     thunk()
-                except:
+                except asyncore.ExitNow:
+                    raise
+                except Exception: # don't catch SystemExit/KeyboardInterrupt
                     nil, t, v, tbinfo = asyncore.compact_traceback()
                     self.log_info(
                         'exception in trigger thunk: (%s:%s %s)' %

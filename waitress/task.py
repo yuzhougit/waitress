@@ -12,9 +12,11 @@
 #
 ##############################################################################
 
+import asyncore
 import socket
 import sys
 import threading
+import thread
 import time
 
 from waitress.buffers import ReadOnlyFileBasedBuffer
@@ -81,6 +83,13 @@ class ThreadedTaskDispatcher(object):
                         'Exception when servicing %r' % task)
                     if isinstance(e, JustTesting):
                         break
+                except KeyboardInterrupt as e:
+                    # we translate a KeyboardInterrupt exception raised in a
+                    # thread to mean call thread.interrupt_main(), which will
+                    # cause a KeyboardInterrupt to be raised in the main
+                    # process (eventually causing the process to exit).
+                    thread.interrupt_main()
+                    break
         finally:
             with self.thread_mgmt_lock:
                 self.stop_count -= 1
@@ -111,7 +120,7 @@ class ThreadedTaskDispatcher(object):
         try:
             task.defer()
             self.queue.put(task)
-        except:
+        except Exception: # dont catch SystemExit
             task.cancel()
             raise
 

@@ -102,7 +102,7 @@ class Test_run(unittest.TestCase):
 
     def test_cwd_added_to_path(self):
         def null_serve(app, **kw):
-            pass
+            return 0
         sys_path = sys.path
         current_dir = os.getcwd()
         try:
@@ -127,6 +127,7 @@ class Test_run(unittest.TestCase):
         def check_server(app, **kw):
             self.assertIs(app, _apps.app)
             self.assertDictEqual(kw, {'port': '80'})
+            return 0
         argv = [
             'waitress-serve',
             '--port=80',
@@ -139,6 +140,7 @@ class Test_run(unittest.TestCase):
         def check_server(app, **kw):
             self.assertIs(app, _apps.app)
             self.assertDictEqual(kw, {'port': '80'})
+            return 0
         argv = [
             'waitress-serve',
             '--port=80',

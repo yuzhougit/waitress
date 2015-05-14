@@ -213,5 +213,4 @@ def run(argv=sys.argv, _serve=serve):
     # These arguments are specific to the runner, not waitress itself.
     del kw['call'], kw['help']
 
-    _serve(app, **kw)
-    return 0
+    return _serve(app, **kw)

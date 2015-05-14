@@ -141,7 +141,9 @@ class HTTPChannel(logging_dispatcher, object):
                 if self.adj.log_socket_errors:
                     self.logger.exception('Socket error')
                 self.will_close = True
-            except:
+            except asyncore.ExitNow:
+                raise
+            except Exception: # don't catch SystemExit/KeyboardInterrupt
                 self.logger.exception('Unexpected exception when flushing')
                 self.will_close = True
 
@@ -244,7 +246,9 @@ class HTTPChannel(logging_dispatcher, object):
                     toclose = self.outbufs.pop(0)
                     try:
                         toclose.close()
-                    except:
+                    except asyncore.ExitNow:
+                        raise
+                    except Exception: # don't catch SystemExit/KBInterrupt
                         self.logger.exception(
                             'Unexpected error when closing an outbuf')
                     continue # pragma: no cover (coverage bug, it is hit)
@@ -275,7 +279,9 @@ class HTTPChannel(logging_dispatcher, object):
         for outbuf in self.outbufs:
             try:
                 outbuf.close()
-            except:
+            except asyncore.ExitNow:
+                raise
+            except Exception: # don't catch SystemExit/KeyboardInterrupt
                 self.logger.exception(
                     'Unknown exception while trying to close outbuf')
         self.connected = False
@@ -334,7 +340,9 @@ class HTTPChannel(logging_dispatcher, object):
                     task = self.task_class(self, request)
                 try:
                     task.service()
-                except:
+                except asyncore.ExitNow:
+                    raise
+                except Exception: # don't catch SystemExit/KeyboardInterrupt
                     self.logger.exception('Exception when serving %s' %
                                           task.request.path)
                     if not task.wrote_header:

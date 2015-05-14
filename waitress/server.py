@@ -163,8 +163,18 @@ class BaseWSGIServer(logging_dispatcher, object):
                 map=self._map,
                 use_poll=self.adj.asyncore_use_poll,
             )
-        except (SystemExit, KeyboardInterrupt):
+        except KeyboardInterrupt:
+            # note that this is the codepath that will be executed both during
+            # an actual ctrl-C of a foregrounded program, when any task code
+            # raises KeyboardInterrupt in a thread, or when any subthread of
+            # this process calls thread.interrupt_main()
+            exitcode = 1
+        except (SystemExit, asyncore.ExitNow):
+            # note that this is the codepath that will be executed when SIGTERM
+            # is sent to the main thread
             self.task_dispatcher.shutdown()
+            exitcode = 0
+        return exitcode
 
     def pull_trigger(self):
         self.trigger.pull_trigger()

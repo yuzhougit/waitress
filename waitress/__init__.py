@@ -14,8 +14,10 @@ def serve(app, **kw):
                                            server.effective_port))
     if _profile: # pragma: no cover
         profile('server.run()', globals(), locals(), (), False)
+        exitcode = 0
     else:
-        server.run()
+        exitcode = server.run()
+    return exitcode
 
 def serve_paste(app, global_conf, **kw):
     serve(app, **kw)

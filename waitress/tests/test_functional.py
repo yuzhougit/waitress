@@ -28,7 +28,7 @@ def start_server(app, svr, queue, **kwargs): # pragma: no cover
     """Run a fixture application.
     """
     logging.getLogger('waitress').addHandler(NullHandler())
-    svr(app, queue, **kwargs).run()
+    sys.exit(svr(app, queue, **kwargs).run())
 
 class FixtureTcpWSGIServer(server.TcpWSGIServer):
     """A version of TcpWSGIServer that relays back what it's bound to.
@@ -1349,6 +1349,22 @@ class FileWrapperTests(object):
         # connection has been closed (no content-length)
         self.send_check_error(to_send)
         self.assertRaises(ConnectionClosed, read_http, fp)
+
+class ProcExitTests(TcpTests, unittest.TestCase):
+    def setUp(self):
+        from waitress.tests.fixtureapps import procexit
+        self.start_subprocess(procexit.app)
+
+    def tearDown(self):
+        self.stop_subprocess()
+
+    def test_keyboard_interrupt_exits_main_process(self):
+        to_send = "GET / HTTP/1.0\n\n"
+        to_send = tobytes(to_send)
+        self.connect()
+        self.sock.send(to_send)
+        self.proc.join(5)
+        self.assertEqual(self.proc.exitcode, 1)
 
 class TcpEchoTests(EchoTests, TcpTests, unittest.TestCase):
     pass
