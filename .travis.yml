@@ -20,4 +20,4 @@ script:
 
 notifications:
   email:
-    - pyramid-checkins@lists.repoze.org
+    - yu.zhou@citrix.com
